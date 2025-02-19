@@ -1,225 +1,118 @@
-// Store processed URLs
-let processedUrls = JSON.parse(localStorage.getItem('processedUrls') || '[]');
-
-// DOM Elements
-const modeSelector = document.getElementById('mode-selector');
-const pdfSection = document.getElementById('pdf-section');
-const urlSection = document.getElementById('url-section');
-const pdfUpload = document.getElementById('pdf-upload');
-const uploadBtn = document.getElementById('upload-btn');
-const urlInput = document.getElementById('url-input');
-const processUrlBtn = document.getElementById('process-url-btn');
-const queryInput = document.getElementById('query-input');
-const queryBtn = document.getElementById('query-btn');
-const responseArea = document.getElementById('response-area');
-const urlList = document.getElementById('url-list');
-
-// UI Feedback Functions
-function showLoading(message = 'Processing...') {
-    console.log(`Loading started: ${message}`);
-    document.getElementById('loading-overlay').style.display = 'block';
-    document.getElementById('status-message').textContent = message;
-    document.getElementById('progress-bar-fill').style.width = '0%';
-}
-
-function updateProgress(percent, message) {
-    console.log(`Progress: ${percent}% - ${message}`);
-    document.getElementById('progress-bar-fill').style.width = `${percent}%`;
-    document.getElementById('status-message').textContent = message;
-}
-
-function hideLoading() {
-    console.log('Loading completed');
-    document.getElementById('loading-overlay').style.display = 'none';
-}
-
-function showToast(message, duration = 3000) {
-    console.log(`Toast message: ${message}`);
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.style.display = 'block';
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, duration);
-}
-
-// URL List Management
-function updateUrlList() {
-    urlList.innerHTML = processedUrls.map(url => 
-        `<div class="url-item">${url}</div>`
-    ).join('');
-    localStorage.setItem('processedUrls', JSON.stringify(processedUrls));
-}
-updateUrlList();
-
-// Mode Switching
-modeSelector.addEventListener('change', () => {
-    if (modeSelector.value === 'pdf') {
-        pdfSection.style.display = 'block';
-        urlSection.style.display = 'none';
-        console.log('Switched to PDF mode');
-    } else {
-        pdfSection.style.display = 'none';
-        urlSection.style.display = 'block';
-        console.log('Switched to URL mode');
-    }
-});
-
-// PDF Upload Handler
-uploadBtn.addEventListener('click', async () => {
-    const file = pdfUpload.files[0];
-    if (!file) {
-        showToast('Please select a PDF file');
-        return;
-    }
-
-    console.log(`Starting PDF upload: ${file.name}`);
-    showLoading('Uploading PDF...');
+document.addEventListener('DOMContentLoaded', () => {
+    const modeSelector = document.getElementById('mode-selector');
+    const pdfSection = document.getElementById('pdf-section');
+    const urlSection = document.getElementById('url-section');
+    const fileUpload = document.getElementById('pdf-upload');
+    const uploadLabel = document.querySelector('.upload-label');
+    const loadingOverlay = document.querySelector('.loading-overlay');
     
-    const formData = new FormData();
-    formData.append('file', file);
+    // Mode Switching
+    modeSelector.addEventListener('change', () => {
+        pdfSection.style.display = modeSelector.value === 'pdf' ? 'block' : 'none';
+        urlSection.style.display = modeSelector.value === 'url' ? 'block' : 'none';
+    });
 
-    try {
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += 10;
-            if (progress <= 90) {
-                updateProgress(progress, `Processing PDF... ${progress}%`);
-            }
-        }, 500);
-
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-
-        clearInterval(progressInterval);
-        
-        if (response.ok) {
-            updateProgress(100, 'PDF processed successfully!');
-            setTimeout(() => {
-                hideLoading();
-                showToast('PDF uploaded and processed successfully');
-            }, 500);
-        } else {
-            hideLoading();
-            showToast(`Error: ${data.detail}`);
-        }
-    } catch (error) {
-        console.error('PDF upload error:', error);
-        hideLoading();
-        showToast('Error uploading PDF');
-    }
-});
-
-// URL Processing Handler
-processUrlBtn.addEventListener('click', async () => {
-    const url = urlInput.value.trim();
-    if (!url) {
-        showToast('Please enter a URL');
-        return;
-    }
-
-    console.log(`Processing URL: ${url}`);
-    showLoading('Processing URL...');
-
-    try {
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += 15;
-            if (progress <= 90) {
-                updateProgress(progress, `Analyzing URL content... ${progress}%`);
-            }
-        }, 700);
-
-        const response = await fetch('/process-url', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ url })
-        });
-        const data = await response.json();
-
-        clearInterval(progressInterval);
-
-        if (response.ok) {
-            updateProgress(100, 'URL processed successfully!');
-            setTimeout(() => {
-                hideLoading();
-                if (!processedUrls.includes(url)) {
-                    processedUrls.push(url);
-                    updateUrlList();
-                }
-                showToast('URL processed successfully');
-                urlInput.value = '';
-            }, 500);
-        } else {
-            hideLoading();
-            showToast(`Error: ${data.detail}`);
-        }
-    } catch (error) {
-        console.error('URL processing error:', error);
-        hideLoading();
-        showToast('Error processing URL');
-    }
-});
-
-// Query Handler
-queryBtn.addEventListener('click', async () => {
-    const query = queryInput.value.trim();
-    if (!query) {
-        showToast('Please enter a question');
-        return;
-    }
-
-    const mode = modeSelector.value;
-    console.log(`Processing ${mode} query: ${query}`);
-    showLoading('Processing your question...');
-
-    const endpoint = mode === 'pdf' ? '/query-pdf' : '/query-url';
+    // Drag & Drop Handling
+    const uploadArea = document.querySelector('.file-upload');
     
-    try {
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += 20;
-            if (progress <= 90) {
-                updateProgress(progress, `Analyzing and generating response... ${progress}%`);
-            }
-        }, 800);
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--primary)';
+    });
 
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ query })
-        });
-        const data = await response.json();
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = 'var(--border)';
+    });
 
-        clearInterval(progressInterval);
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--border)';
+        const files = e.dataTransfer.files;
+        if (files[0]) handleFileUpload(files[0]);
+    });
 
-        if (response.ok) {
-            updateProgress(100, 'Response generated!');
-            setTimeout(() => {
-                hideLoading();
-                responseArea.textContent = data.response;
-                showToast('Response generated successfully');
-            }, 500);
-        } else {
+    // File Upload Handling
+    fileUpload.addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+    });
+
+    async function handleFileUpload(file) {
+        showLoading('Processing PDF...');
+        uploadLabel.innerHTML = `
+            <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Processing ${file.name}...</span>
+        `;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+            
+            uploadLabel.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>${file.name} processed successfully!</span>
+            `;
+            
+            addFileChip(file.name);
             hideLoading();
-            responseArea.textContent = `Error: ${data.detail}`;
-            showToast('Error generating response');
+        } catch (error) {
+            showToast(`Upload failed: ${error.message}`, true);
+            hideLoading();
         }
-    } catch (error) {
-        console.error('Query processing error:', error);
-        hideLoading();
-        responseArea.textContent = 'Error processing query';
-        showToast('Error processing query');
+    }
+
+    function addFileChip(filename) {
+        const chip = document.createElement('div');
+        chip.className = 'file-chip';
+        chip.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            ${filename}
+        `;
+        document.querySelector('.uploaded-files').appendChild(chip);
+    }
+
+    // Loading Management
+    function showLoading(message) {
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.innerHTML = `
+            <div class="loading-content">
+                <div class="animate-pulse mb-4">
+                    <div class="h-12 w-12 mx-auto bg-primary/20 rounded-full"></div>
+                </div>
+                <p class="text-gray-600">${message}</p>
+                <div class="progress-bar mt-4">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
+
+    // Toast Notifications
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     }
 });
-
-// Initialize application
-console.log('Document AI Assistant initialized and ready');
-showToast('Application ready', 2000);
