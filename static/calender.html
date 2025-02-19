@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro-Docx</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.6/standalone/umd/vis-network.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-semibold text-gray-900">Neuro-Docx</h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Calendar Section -->
+        <section class="mb-8">
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-4">
+                        <h2 class="text-xl font-semibold text-gray-900" id="currentMonth"></h2>
+                        <div class="flex space-x-2">
+                            <button onclick="previousMonth()" class="p-2 rounded-lg hover:bg-gray-100">
+                                ←
+                            </button>
+                            <button onclick="nextMonth()" class="p-2 rounded-lg hover:bg-gray-100">
+                                →
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="openEventModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Add Event
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-4 mb-4">
+                    <div class="text-sm font-medium text-gray-500">Sun</div>
+                    <div class="text-sm font-medium text-gray-500">Mon</div>
+                    <div class="text-sm font-medium text-gray-500">Tue</div>
+                    <div class="text-sm font-medium text-gray-500">Wed</div>
+                    <div class="text-sm font-medium text-gray-500">Thu</div>
+                    <div class="text-sm font-medium text-gray-500">Fri</div>
+                    <div class="text-sm font-medium text-gray-500">Sat</div>
+                </div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-4"></div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- Pomodoro Timer -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h3 class="text-lg font-semibold mb-6 text-gray-900">Focus Timer</h3>
+                <div class="text-center">
+                    <div class="mb-6">
+                        <div id="timer" class="text-5xl font-bold text-gray-900">25:00</div>
+                        <div id="timerStatus" class="text-sm text-gray-500 mt-2">Ready to focus</div>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="startButton" onclick="startTimer()" class="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors">Start</button>
+                        <button id="pauseButton" onclick="pauseTimer()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors" disabled>Pause</button>
+                        <button id="resetButton" onclick="resetTimer()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Editor -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h3 class="text-lg font-semibold mb-6 text-gray-900">Quick Notes</h3>
+                <textarea id="notesEditor" class="w-full h-48 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Write your notes in Markdown..."></textarea>
+                <div id="notesPreview" class="prose mt-4 p-4 bg-gray-50 rounded-lg"></div>
+            </div>
+        </div>
+
+        <!-- Graph Visualization -->
+        <section class="bg-white rounded-lg shadow-sm border p-6">
+            <h3 class="text-lg font-semibold mb-6 text-gray-900">Knowledge Graph</h3>
+            <div id="networkGraph" class="w-full h-[400px] border rounded-lg bg-gray-50"></div>
+        </section>
+    </main>
+
+    <!-- Event Modal -->
+    <div id="eventModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 class="text-lg font-semibold mb-6 text-gray-900">Create New Event</h3>
+            <form id="eventForm" onsubmit="saveEvent(event)">
+                <div class="mb-4">
+                    <label for="eventTitle" class="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                    <input type="text" id="eventTitle" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
+                <div class="mb-6">
+                    <label for="eventDate" class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+                    <input type="datetime-local" id="eventDate" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeEventModal()" class="px-4 py-2 rounded-lg border hover:bg-gray-50 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Calendar Logic
+        let currentDate = new Date();
+        let events = JSON.parse(localStorage.getItem('events')) || [];
+
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            // Add empty cells for days before first of month
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'h-24 rounded-lg bg-gray-50';
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const cell = document.createElement('div');
+                cell.className = 'h-24 rounded-lg border hover:border-blue-500 transition-colors p-2';
+                
+                const dateText = document.createElement('div');
+                dateText.className = 'text-sm font-medium text-gray-700';
+                dateText.textContent = day;
+                cell.appendChild(dateText);
+
+                // Add events for this day
+                const dayEvents = events.filter(event => {
+                    const eventDate = new Date(event.date);
+                    return eventDate.getDate() === day && 
+                           eventDate.getMonth() === currentDate.getMonth() &&
+                           eventDate.getFullYear() === currentDate.getFullYear();
+                });
+
+                dayEvents.forEach(event => {
+                    const eventEl = document.createElement('div');
+                    eventEl.className = 'text-xs mt-1 p-1 rounded bg-blue-100 text-blue-800 truncate';
+                    eventEl.textContent = event.title;
+                    cell.appendChild(eventEl);
+                });
+
+                calendarGrid.appendChild(cell);
+            }
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+        }
+
+        // Event Modal Logic
+        function openEventModal() {
+            document.getElementById('eventModal').classList.remove('hidden');
+            const now = new Date();
+            const dateString = now.toISOString().slice(0, 16);
+            document.getElementById('eventDate').value = dateString;
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+            document.getElementById('eventForm').reset();
+        }
+
+        function saveEvent(e) {
+            e.preventDefault();
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            
+            events.push({ title, date });
+            localStorage.setItem('events', JSON.stringify(events));
+            
+            generateCalendar();
+            closeEventModal();
+
+            // Update knowledge graph
+            addEventNode(title);
+        }
+
+        // Pomodoro Timer
+        let timerInterval;
+        let timeLeft = 25 * 60;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('pauseButton').disabled = false;
+                document.getElementById('timerStatus').textContent = 'Focus time!';
+                
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        document.getElementById('timerStatus').textContent = 'Time to take a break!';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('pauseButton').disabled = true;
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('pauseButton').disabled = true;
+            document.getElementById('timerStatus').textContent = 'Paused';
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = 25 * 60;
+            updateTimerDisplay();
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('pauseButton').disabled = true;
+            document.getElementById('timerStatus').textContent = 'Ready to focus';
+        }
+
+        // Notes Editor
+        const notesEditor = document.getElementById('notesEditor');
+        notesEditor.addEventListener('input', (e) => {
+            document.getElementById('notesPreview').innerHTML = marked.parse(e.target.value);
+        });
+
+        // Knowledge Graph
+        let network;
+        const nodes = new vis.DataSet();
+        const edges = new vis.DataSet();
+
+        function initializeGraph() {
+            const container = document.getElementById('networkGraph');
+            const data = { nodes, edges };
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 16,
+                    font: {
+                        size: 12,
+                        color: '#333'
+                    },
+                    borderWidth: 2,
+                    color: {
+                        background: '#fff',
+                        border: '#2563eb',
+                        highlight: {
+                            background: '#93c5fd',
+                            border: '#2563eb'
+                        }
+                    }
+                },
+                edges: {
+                    color: '#93c5fd',
+                    width: 2,
+                    smooth: {
+                        type: 'continuous'
+                    }
+                },
+                physics: {
+                    stabilization: true,
+                    barnesHut: {
+                        gravitationalConstant: -2000,
+                        springLength: 200
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+        }
+
+        function addEventNode(title) {
+            const nodeId = nodes.length + 1;
+            nodes.add({
+                id: nodeId,
+                label: title
+            });
+
+            // Connect to previous node if it exists
+            if (nodeId > 1) {
+                edges.add({
+                    from: nodeId - 1,
+                    to: nodeId
+                });
+            }
+        }
+
+        // Initialize everything
+        generateCalendar();
+        initializeGraph();
+    </script>
+</body>
+</html>
