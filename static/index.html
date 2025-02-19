@@ -3,62 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro-Docxs</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Neuro-Docxs | Document Intelligence Platform</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Neuro-Docx</h1>
+        <h1>Neuro-Docxs</h1>
 
         <div class="section">
-            <div class="section-title">Mode Selection</div>
-            <select id="mode-selector">
-                <option value="pdf">PDF Analysis</option>
-                <option value="url">URL Analysis</option>
+            <div class="section-title">Analysis Mode</div>
+            <select id="mode-selector" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
+                <option value="pdf">PDF Document Analysis</option>
+                <option value="url">Web Content Analysis</option>
             </select>
         </div>
+
         <div id="pdf-section" class="section">
-            <div class="section-title">PDF Upload</div>
-            <div class="input-group">
-                <input type="file" id="pdf-upload" accept=".pdf" />
-                <button id="upload-btn">Upload PDF</button>
+            <div class="section-title">Upload Documents</div>
+            <div class="file-upload">
+                <input type="file" id="pdf-upload" accept=".pdf" hidden>
+                <div class="upload-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <span class="text-lg">Drag & drop PDF files or click to upload</span>
+                    <span class="text-sm text-secondary">Max file size: 25MB</span>
+                </div>
             </div>
+            <div class="uploaded-files"></div>
         </div>
 
         <div id="url-section" class="section" style="display: none;">
-            <div class="section-title">URL Processing</div>
+            <div class="section-title">Analyze Web Content</div>
             <div class="input-group">
-                <input type="text" id="url-input" placeholder="Enter URL" />
-                <button id="process-url-btn">Process URL</button>
-            </div>
-            <div class="url-list" id="url-list">
-                <!-- Processed URLs will be listed here -->
+                <input type="text" id="url-input" placeholder="Enter website URL (e.g. https://example.com)" 
+                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
+                <button id="process-url-btn" class="mt-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition">
+                    Analyze Website
+                </button>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Ask Questions</div>
+            <div class="section-title">Document Insights</div>
             <div class="input-group">
-                <input type="text" id="query-input" placeholder="Enter your question" />
-                <button id="query-btn">Ask Question</button>
+                <input type="text" id="query-input" placeholder="Ask questions about your documents..." 
+                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
+                <button id="query-btn" class="mt-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition">
+                    Generate Insights
+                </button>
             </div>
-            <div class="response-area" id="response-area">
-                Response will appear here...
-            </div>
-        </div>
-    </div>
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-spinner">
-            <div class="progress-bar">
-                <div class="progress-bar-fill" id="progress-bar-fill"></div>
-            </div>
-            <div class="status-message" id="status-message">Processing...</div>
+            <div class="response-area mt-4"></div>
         </div>
     </div>
 
-   
-    <div class="toast" id="toast"></div>
-
-    <script src="script.js"></script>
+    <div class="loading-overlay"></div>
+    <script src="/static/script.js"></script>
 </body>
 </html>
