@@ -3,62 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro-Docxs | Document Intelligence Platform</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Neuro-Docxs</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/styles.css"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Neuro-Docxs</h1>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-all">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 p-5 shadow-lg">
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Neuro-Docxs</h1>
+            <nav class="mt-5">
+                <ul>
+                    <li class="py-2 hover:text-blue-500"><a href="#home-section">Home</a></li>
+                    <li class="py-2 hover:text-blue-500"><a href="#pdf-section">PDF Analysis</a></li>
+                    <li class="py-2 hover:text-blue-500"><a href="#url-section">URL Analysis</a></li>
+                    <li class="py-2 hover:text-blue-500"><a href="#ask-section">Ask Questions</a></li>
+                    <li class="py-2 hover:text-blue-500"><a href="/static/calender.html">Schedule Meeting</a></li>
+                </ul>
+            </nav>
+            <button id="dark-mode-toggle" class="mt-5 px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded">Toggle Dark Mode</button>
+        </aside>
 
-        <div class="section">
-            <div class="section-title">Analysis Mode</div>
-            <select id="mode-selector" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
-                <option value="pdf">PDF Document Analysis</option>
-                <option value="url">Web Content Analysis</option>
-            </select>
-        </div>
+        <!-- Main Content -->
+        <main class="flex-1 p-10">
+            <!-- Home Section -->
+            <section id="home-section">
+                <label class="text-lg font-semibold">Mode Selection:</label>
+                <select id="mode-selector" class="ml-3 p-2 border rounded bg-white dark:bg-gray-700">
+                    <option value="pdf">PDF Analysis</option>
+                    <option value="url">URL Analysis</option>
+                </select>
+            </section>
 
-        <div id="pdf-section" class="section">
-            <div class="section-title">Upload Documents</div>
-            <div class="file-upload">
-                <input type="file" id="pdf-upload" accept=".pdf" hidden>
-                <div class="upload-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                    <span class="text-lg">Drag & drop PDF files or click to upload</span>
-                    <span class="text-sm text-secondary">Max file size: 25MB</span>
+            <!-- PDF Upload Section -->
+            <section id="pdf-section" class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold">Upload PDF</h2>
+                <div id="drop-zone" class="border-dashed border-2 p-10 text-center mt-4 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700">
+                    <input type="file" id="pdf-upload" accept=".pdf" class="hidden" />
+                    <p id="drop-text">Drag & Drop your PDF here or <span class="text-blue-500 cursor-pointer">Browse</span></p>
                 </div>
-            </div>
-            <div class="uploaded-files"></div>
-        </div>
+                <button id="upload-btn" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Upload</button>
+                <div id="upload-status" class="mt-4 text-sm text-gray-600 dark:text-gray-400"></div>
+            </section>
 
-        <div id="url-section" class="section" style="display: none;">
-            <div class="section-title">Analyze Web Content</div>
-            <div class="input-group">
-                <input type="text" id="url-input" placeholder="Enter website URL (e.g. https://example.com)" 
-                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
-                <button id="process-url-btn" class="mt-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition">
-                    Analyze Website
-                </button>
-            </div>
-        </div>
+            <!-- URL Processing Section -->
+            <section id="url-section" class="mt-6 hidden bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold">Process URL</h2>
+                <div class="mt-4">
+                    <input type="text" id="url-input" placeholder="Enter URL" class="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700" />
+                    <button id="process-url-btn" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Process</button>
+                </div>
+                <div class="mt-4" id="url-list"></div>
+            </section>
 
-        <div class="section">
-            <div class="section-title">Document Insights</div>
-            <div class="input-group">
-                <input type="text" id="query-input" placeholder="Ask questions about your documents..." 
-                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
-                <button id="query-btn" class="mt-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition">
-                    Generate Insights
-                </button>
-            </div>
-            <div class="response-area mt-4"></div>
-        </div>
+            <!-- Ask Questions Section -->
+            <section id="ask-section" class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold">Ask Questions</h2>
+                <div class="mt-4">
+                    <input type="text" id="query-input" placeholder="Enter your question" class="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700" />
+                    <button id="query-btn" class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Ask</button>
+                </div>
+                <div class="mt-4 p-3 border rounded bg-gray-50 dark:bg-gray-700" id="response-area">Response will appear here...</div>
+            </section>
+
+            <!-- Meeting Scheduler Section 
+            <section id="meeting-section" class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold">Schedule Meeting</h2>
+                <div class="mt-4">
+                    <input type="text" id="meeting-title" placeholder="Meeting Title" class="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 mb-2" />
+                    <input type="datetime-local" id="meeting-time" class="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700" />
+                    <button id="schedule-meeting-btn" class="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">Schedule</button>
+                </div>
+            </section>
+            -->
+        </main>
     </div>
 
-    <div class="loading-overlay"></div>
     <script src="/static/script.js"></script>
 </body>
 </html>
