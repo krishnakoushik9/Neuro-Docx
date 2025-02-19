@@ -5,14 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileUpload = document.getElementById('pdf-upload');
     const uploadLabel = document.querySelector('.upload-label');
     const loadingOverlay = document.querySelector('.loading-overlay');
+
     
-    // Mode Switching
     modeSelector.addEventListener('change', () => {
         pdfSection.style.display = modeSelector.value === 'pdf' ? 'block' : 'none';
         urlSection.style.display = modeSelector.value === 'url' ? 'block' : 'none';
     });
 
-    // Drag & Drop Handling
+    
     const uploadArea = document.querySelector('.file-upload');
     
     uploadArea.addEventListener('dragover', (e) => {
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (files[0]) handleFileUpload(files[0]);
     });
 
-    // File Upload Handling
+    
     fileUpload.addEventListener('change', (e) => {
         if (e.target.files[0]) handleFileUpload(e.target.files[0]);
     });
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.uploaded-files').appendChild(chip);
     }
 
-    // Loading Management
+    
     function showLoading(message) {
         loadingOverlay.style.display = 'flex';
         loadingOverlay.innerHTML = `
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingOverlay.style.display = 'none';
     }
 
-    // Toast Notifications
+    
     function showToast(message, isError = false) {
         const toast = document.createElement('div');
         toast.className = `toast ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
